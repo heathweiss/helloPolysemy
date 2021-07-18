@@ -62,6 +62,7 @@ dependencies:
 - polysemy
 - polysemy-plugin
 - polysemy-zoo 
+- text
 library:
   source-dirs: src
 

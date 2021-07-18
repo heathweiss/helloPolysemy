@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e42c19c3783c439371ab775e3365f768af01a1fcbf4eb22e64e2e200224325b9
+-- hash: 8551d4e8c722b0b4b7cdfc04898a39e1c42bdd75983007d86831a649e4b33ffa
 
 name:           helloPolysemy
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Lib
+      MyError
   other-modules:
       Paths_helloPolysemy
   hs-source-dirs:
@@ -39,6 +40,7 @@ library
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , text
   default-language: Haskell2010
 
 executable helloPolysemy-exe
@@ -55,6 +57,7 @@ executable helloPolysemy-exe
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , text
   default-language: Haskell2010
 
 test-suite helloPolysemy-test
@@ -72,4 +75,5 @@ test-suite helloPolysemy-test
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , text
   default-language: Haskell2010
