@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8551d4e8c722b0b4b7cdfc04898a39e1c42bdd75983007d86831a649e4b33ffa
+-- hash: 780c3232e2c6434873d539358e5f8336a24808c1f907b8e25f53b0d9799e6350
 
 name:           helloPolysemy
 version:        0.1.0.0
@@ -37,23 +37,6 @@ library
   ghc-options: -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -Wall -Wcompat -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
       base >=4.7 && <5
-    , polysemy
-    , polysemy-plugin
-    , polysemy-zoo
-    , text
-  default-language: Haskell2010
-
-executable helloPolysemy-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_helloPolysemy
-  hs-source-dirs:
-      app
-  default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell OverloadedStrings GeneralizedNewtypeDeriving DeriveGeneric OverloadedStrings
-  ghc-options: -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -Wall -Wcompat -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , helloPolysemy
     , polysemy
     , polysemy-plugin
     , polysemy-zoo

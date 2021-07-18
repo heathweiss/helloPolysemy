@@ -23,12 +23,17 @@ newtype Name = Name T.Text deriving (Show)
 newtype Email = Email T.Text deriving Show
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------ create a Name using a fx that returns a Sem monad
+{------------------ Test out Trace, using newtype Name.----------------------
 
---Do I need to make my own interpretation, if I can use existing ones.
---See: https://github.com/KerfuffleV2/haskell-polysemy-test/pull/1
---data Name m a where
-  --MakeName :: T.Text -> T.Text -> Name m NameText runTraceIO
+Test out the trace function.
+Note that did not create a Sem monad from the Name ADT. That will be done later.
+
+Because Name is not a Sem monad:
+Do not need to run an interpreter for it.
+Can't write high level code using it, as there is not interpreter.
+There are no multiple constructors for it.
+-}
+
 
 makeNameWithTrace :: forall r. Members '[Trace] r => Sem r Name
 makeNameWithTrace = do
@@ -59,8 +64,12 @@ makeNameWithTracePrefix = do
  return a
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------ create a name using a NameSem effect
+
+{------------------ create an instance of Sem for the Name newtype, so can use it with effects.
+
+-}
 data NameSem m a where
+  --Make a Name, without wrapping it in Either.
   MakeName :: T.Text -> NameSem m Name
   MakeSafeName :: T.Text -> NameSem m (Either T.Text Name) 
   
@@ -77,6 +86,14 @@ createName :: Member NameSem r => Sem r Name
 createName = 
   makeName "Heath"
 
+--Smart constructor for Name, which uses Either to ensure the name is "Heath"
+--Gets called by an interpreter.
+newSafeName :: T.Text -> Either T.Text Name
+newSafeName name = 
+  if name == "Heath" then Right $ Name name
+    else
+      Left "name was not Heath"
+
 --interpretName :: Member NameSem r => Sem (NameSem : r) a -> Sem r a 
 --Do not put the  'Member NameSem r =>' in there, as it then has that effect, 
 --which then has to be interpreted.
@@ -85,26 +102,31 @@ interpretName = interpret $ \case
   MakeName nameString -> return $ Name nameString
   MakeSafeName nameString -> return $ newSafeName nameString
 
-
+--Requires a Name to build an Email.
+--The Name can be made directly, or with newSafeName, in which case the Error effect is required. 
 interpretEmail :: Sem (EmailSem : r) a -> Sem r a
 interpretEmail = interpret $ \case
   MakeEmail (Name name) -> return $ Email (name <> "@hotmail.com")
 
 runCreateName :: IO ()
 runCreateName = do
-  --print $ createName & interpretName & run
   --No need to use the createName fx, call makeName directly.
   print $ makeName "Heath" & interpretName & run
   return ()
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
---Combine the use of the above 2 effects, NameSem and Trace, to make a Name with tracing.
+{-
+Create a Name, without the Error effect for simplicity, and add Trace effect to it.
+-}
+
+--Combine the use of NameSem and Trace effects, to make a Name with tracing.
 makeEffectfulNameWithTrace :: forall r. Members '[Trace,NameSem] r => Sem r Name
 makeEffectfulNameWithTrace = do
   trace "make name: Heath"
   makeName "Heath"
 
+--print the trace statements with IO
 runCreateEffectfulNameAndTrace :: IO ()
 runCreateEffectfulNameAndTrace = do
   let (s,a) = makeEffectfulNameWithTrace & interpretName & runTraceList & run
@@ -112,62 +134,73 @@ runCreateEffectfulNameAndTrace = do
   print a
   return ()
 
---instead of using print in IO, print using traceToIO interpretation.
+--print the trace statements using traceToIO interpretation.
 runCreateEffectfulNameAndTraceWithoutIO :: IO Name
 runCreateEffectfulNameAndTraceWithoutIO = 
   makeEffectfulNameWithTrace & interpretName & traceToIO  & runM
   
   ----------------------------------------------------------------------------------------------------------------------------------------------------------
---Now add error handling.
-{- 
-Will use the MakeSafeName constructor of NameSem 
+{-
+Create a safe name, handle with and without the Error effect.
+
+Use the MakeSafeName constructor of NameSem, to get Either Text Name
 
 Will be an error to create a name that is not Heath.
-
-Will use a smart constructor to create and Either String Name
-
-Will convert the Either value into an Error
-
-
 -}
-newSafeName :: T.Text -> Either T.Text Name
-newSafeName name = 
-  if name == "Heath" then Right $ Name name
-    else
-      Left "name was not Heath"
 
 
---the high level effects code
+
+--High level effects code
 --All is does is call makeSafeName, so it is pointless, but would be req'd if it was more complex.
 --Eg: createSafeNameWithError calls makeSafeName and binds it to fromEither to add the Error effect.
 createSafeName :: Member NameSem r => T.Text -> Sem r (Either T.Text Name)
 createSafeName nameAsText = do
   makeSafeName nameAsText
 
-
+--Create a safe Name, and add the Error effect to it.
 createSafeNameWithError :: Members '[NameSem, Error T.Text] r => T.Text -> Sem r Name
 createSafeNameWithError nameAsText = do
   makeSafeName nameAsText >>= fromEither 
 
-
+--Create the high level Effects code, which later get interpreted.
 createNameAndEmail :: Members '[NameSem, EmailSem, Error T.Text] r => T.Text -> Sem r Email
 createNameAndEmail nameAsText = do
+  --create an Either Text Name, then remove the Either with the Error effect
   --nameE <- makeSafeName nameAsText
   --name <- fromEither nameE
-  --or combine with bind operator, so it extracts if from the Either the way it would be done if working in Either Monad.
+
+  --or combine with bind operator in a single step
   --name <- makeSafeName nameAsText >>= fromEither
-  --or use a fx designed for it:
+
+  --or use the createSafeNameWithError fx, which is a wrapper around above calls.
   name <- createSafeNameWithError nameAsText
   makeEmail name
 
---
+--interpret the createNameAndEmail high level effects code, using the IO monad.
+--Anything but "Heath" will throw error.
 runCreateNameAndEmailInIO :: IO ()
 runCreateNameAndEmailInIO = do
   print $ createNameAndEmail "Heathy" & interpretName & interpretEmail & runError & run
 
+--interpret the createNameAndEmail high level effects code, without using IO monad.
+--Anything but "Heath" will throw error.
 runCreateNameAndEmail :: Either T.Text Email
 runCreateNameAndEmail = 
   createNameAndEmail "Heath" & interpretName & interpretEmail & runError & run
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+{-------------------------- Create Name with Error and Trace effects---------------------------------}
+createNameWithErrorAndTrace :: Members '[NameSem, Error T.Text, Trace] r => T.Text -> Sem r Name
+createNameWithErrorAndTrace nameAsText = do
+  trace $ "input: " ++ show nameAsText
+  makeSafeName nameAsText >>= fromEither 
+
+runCreateNameWithErrorAndTrace :: IO ()
+runCreateNameWithErrorAndTrace = do
+  --note: it is the runM, that handles the Embed IO effect, that comes from traceToIO. using 'run' will not compile due to unhandled effect.
+  t <- createNameWithErrorAndTrace "Heath" & interpretName & interpretEmail & runError & traceToIO & runM
+  print t 
+  return ()
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------- from the examples in Polysemy.Internal
 example :: Members '[State String, Error String] r => Sem r String
