@@ -22,7 +22,7 @@ resolver:
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
-#
+# 
 # packages:
 # - some-directory
 # - https://example.com/foo/bar/baz-0.0.2.tar.gz
@@ -35,7 +35,10 @@ packages:
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
 #
-# extra-deps:
+extra-deps:
+- polysemy-zoo-0.7.0.1@sha256:60c2921df95f61d43222a75adde4f330e9510320b416132838a354cd81b4bcc5,3846
+- compact-0.2.0.0@sha256:75ef98cb51201b4a0d6de95cbbb62be6237c092a3d594737346c70c5d56c2380,2413
+- constraints-0.12@sha256:71c7999d7fa01d8941f08d37d4c107c6b1bcbd0306e234157557b9b096b7f1be,2217
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a

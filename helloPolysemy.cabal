@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1713e306636390efb7884afe33dad6fa535d766edd57d63b6b147f3c7be9d777
+-- hash: e42c19c3783c439371ab775e3365f768af01a1fcbf4eb22e64e2e200224325b9
 
 name:           helloPolysemy
 version:        0.1.0.0
@@ -32,8 +32,13 @@ library
       Paths_helloPolysemy
   hs-source-dirs:
       src
+  default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell OverloadedStrings GeneralizedNewtypeDeriving DeriveGeneric OverloadedStrings
+  ghc-options: -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -Wall -Wcompat -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
       base >=4.7 && <5
+    , polysemy
+    , polysemy-plugin
+    , polysemy-zoo
   default-language: Haskell2010
 
 executable helloPolysemy-exe
@@ -42,10 +47,14 @@ executable helloPolysemy-exe
       Paths_helloPolysemy
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell OverloadedStrings GeneralizedNewtypeDeriving DeriveGeneric OverloadedStrings
+  ghc-options: -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -Wall -Wcompat -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , helloPolysemy
+    , polysemy
+    , polysemy-plugin
+    , polysemy-zoo
   default-language: Haskell2010
 
 test-suite helloPolysemy-test
@@ -55,8 +64,12 @@ test-suite helloPolysemy-test
       Paths_helloPolysemy
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  default-extensions: DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables TypeApplications TypeOperators TypeFamilies TemplateHaskell OverloadedStrings GeneralizedNewtypeDeriving DeriveGeneric OverloadedStrings
+  ghc-options: -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -Wall -Wcompat -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , helloPolysemy
+    , polysemy
+    , polysemy-plugin
+    , polysemy-zoo
   default-language: Haskell2010
